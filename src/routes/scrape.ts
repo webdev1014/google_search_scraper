@@ -7,7 +7,7 @@ export class ScrapeRoutes {
 
     route(app: Application) {
 
-        app.get('/scrape/get', (req: Request, res: Response) => {
+        app.get('/scrape', (req: Request, res: Response) => {
             this.scrape.get(req, res);
         });
 
