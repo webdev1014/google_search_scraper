@@ -12,7 +12,8 @@ Your app should now be running on [localhost:3000](http://localhost:3000/)
 ### Build
 ```
 npm install
+npm run build
 npm start
 ```
 ### Config Nginx and PM2
-[Documentation](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-18-04)
+[Documentation](https://www.digitalocean.com/community/tutorials/how-to-set-up-a-node-js-application-for-production-on-ubuntu-20-04)
