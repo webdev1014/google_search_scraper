@@ -1,7 +1,16 @@
 import puppeteer from 'puppeteer-extra';
+import RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
 import StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
 puppeteer.use(StealthPlugin());
+puppeteer.use(
+    RecaptchaPlugin({
+        provider: {
+            id: '2captcha',
+            token: '293843ef93997824c8d45dd102cf9452'
+        }
+    })
+)
 
 export default class ScrapeService {
     private option:any = {
@@ -29,7 +38,9 @@ export default class ScrapeService {
 
         try {
             await page.goto(url);
+            await page.solveRecaptchas();
             await page.waitForSelector('span[data-event-action="source-code-tab-clicked"]');
+            await page.waitForTimeout(2000);
             await page.click('span[data-event-action="source-code-tab-clicked"]');
             await page.waitForSelector('div.CodeMirror .CodeMirror-scroll');
             await page.waitForTimeout(3000);
