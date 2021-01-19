@@ -21,6 +21,10 @@ export function sendResponse(data: any, res: Response) {
     res.status(response_status_codes.success).json(data);
 }
 
+export function sendFailure(message: string, res: Response) {
+    res.status(response_status_codes.bad_request).json(message);
+}
+
 export function insufficientParameters(res: Response) {
     res.status(response_status_codes.bad_request).json({
         success: false,

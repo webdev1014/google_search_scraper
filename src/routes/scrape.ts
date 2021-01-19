@@ -7,8 +7,8 @@ export class ScrapeRoutes {
 
     route(app: Application) {
 
-        app.get('/scrape', (req: Request, res: Response) => {
-            this.scrape.get(req, res);
+        app.post('/scrape', (req: Request, res: Response) => {
+            this.scrape.post(req, res);
         });
 
     }
