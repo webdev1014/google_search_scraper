@@ -74,11 +74,17 @@ export default class ScrapeService {
             await page.goto(url);
             await page.solveRecaptchas();
             await page.waitForTimeout(300);
+            console.log('before waiting tab');
             await page.waitForSelector('span[data-event-action="source-code-tab-clicked"]');
+            console.log('after wating tab');
             await page.waitForTimeout(200);
+            console.log('before tab click');
             await page.click('span[data-event-action="source-code-tab-clicked"]');
+            console.log('after tab click');
             await page.waitForSelector('div[role="button"][data-tooltip="Copy"]');
+            console.log('before copy click');
             await page.click('div[role="button"][data-tooltip="Copy"]', {clickCount: 3});
+            console.log('after copy click');
             
             const content = await read();
 
