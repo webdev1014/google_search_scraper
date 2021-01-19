@@ -69,30 +69,23 @@ export default class ScrapeService {
         context.overridePermissions('https://search.google.com', ['clipboard-read']);
 
         try {
-            console.log(1);
             await page.goto(url, {waitUntil: 'load', timeout: 0});
-            console.log(2);
             await page.solveRecaptchas();
-            console.log(3);
             await page.waitForSelector('span[data-event-action="source-code-tab-clicked"]');
-            console.log(4);
             await page.evaluate(() => {
                 const tab: any = document.querySelector('span[data-event-action="source-code-tab-clicked"]');
                 if (tab) {
                     tab.click();
                 }
             });
-            console.log(5);
             await page.waitForTimeout(2000);
             await page.waitForSelector('div[role="button"][data-tooltip="Copy"]');
-            console.log(6);
             await page.evaluate(() => {
                 const btnCopy: any = document.querySelector('div[role="button"][data-tooltip="Copy"]');
                 if (btnCopy) {
                     btnCopy.click();
                 }
             });
-            console.log(7);
             await page.waitForTimeout(2000);
             const content = await page.evaluate(async () => await navigator.clipboard.readText());
             await page.close();
