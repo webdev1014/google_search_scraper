@@ -1,7 +1,6 @@
-import { Page } from 'puppeteer';
+import { BrowserContext, Page } from 'puppeteer';
 import { Cluster } from 'puppeteer-cluster';
 import puppeteer from 'puppeteer-extra';
-import { read } from 'clipboardy';
 import RecaptchaPlugin from 'puppeteer-extra-plugin-recaptcha';
 import StealthPlugin = require('puppeteer-extra-plugin-stealth');
 
@@ -18,11 +17,8 @@ export default class ScrapeService {
         ],
         args: [
             '--no-sandbox',
+            '--window-size=1600,900',
         ],
-        defaultViewport: {
-            'width': 1600,
-            'height': 900,
-        },
         headless: true,
     };
     private token = '293843ef93997824c8d45dd102cf9452';
@@ -69,30 +65,36 @@ export default class ScrapeService {
 
     async scrape(page: Page, url: string): Promise<any> {
         await page.setViewport({width: 1600, height: 900});
+        const context: BrowserContext = page.browserContext();
+        context.overridePermissions('https://search.google.com', ['clipboard-read']);
 
         try {
             await page.goto(url);
             await page.solveRecaptchas();
-            await page.waitForTimeout(300);
-            console.log('before waiting tab');
             await page.waitForSelector('span[data-event-action="source-code-tab-clicked"]');
-            console.log('after wating tab');
-            await page.waitForTimeout(200);
-            console.log('before tab click');
-            await page.click('span[data-event-action="source-code-tab-clicked"]');
-            console.log('after tab click');
+            await page.evaluate(() => {
+                const tab: any = document.querySelector('span[data-event-action="source-code-tab-clicked"]');
+                if (tab) {
+                    tab.click();
+                }
+            });
+            await page.waitForTimeout(2000);
             await page.waitForSelector('div[role="button"][data-tooltip="Copy"]');
-            console.log('before copy click');
-            await page.click('div[role="button"][data-tooltip="Copy"]', {clickCount: 3});
-            console.log('after copy click');
-            
-            const content = await read();
-
+            await page.evaluate(() => {
+                const btnCopy: any = document.querySelector('div[role="button"][data-tooltip="Copy"]');
+                if (btnCopy) {
+                    btnCopy.click();
+                }
+            });
+            await page.waitForTimeout(2000);
+            const content = await page.evaluate(async () => await navigator.clipboard.readText());
             await page.close();
+
             return { success: true, content };
         } catch (error) {
             console.log(error.message);
             await page.close();
+
             return { success: false, content: error.message }
         } 
     }
