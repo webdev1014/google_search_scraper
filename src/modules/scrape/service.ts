@@ -24,7 +24,7 @@ export default class ScrapeService {
         headless: false,
     };
     private token = '293843ef93997824c8d45dd102cf9452';
-    private clusterPage: Cluster = null;
+    private cluster: Cluster = null;
 
     async get(urls: [string]): Promise<string[]> {
         puppeteer.use(StealthPlugin());
@@ -36,7 +36,7 @@ export default class ScrapeService {
                 }
             })
         );
-        this.clusterPage = await Cluster.launch({
+        this.cluster = await Cluster.launch({
             concurrency: Cluster.CONCURRENCY_PAGE,
             maxConcurrency: 40,
             puppeteer: puppeteer,
@@ -44,23 +44,23 @@ export default class ScrapeService {
             timeout: 300000,
             retryLimit: 5,
         });
-        this.clusterPage.on('taskerror', (err, data) => {
+        this.cluster.on('taskerror', (err, data) => {
             console.log(`Error crawling ${data}: ${err.message}`);
         });
 
         const contents = [];
-        await this.clusterPage.task(async ({ page, data: url }) => {
+        await this.cluster.task(async ({ page, data: url }) => {
             const content = await this.scrape(page, url);
             contents.push({ content });
         });
 
 
         for (const url of urls) {
-            this.clusterPage.queue(url);
+            this.cluster.queue(url);
         }
 
-        await this.clusterPage.idle();
-        await this.clusterPage.close();
+        await this.cluster.idle();
+        await this.cluster.close();
         
         return contents;
     }
