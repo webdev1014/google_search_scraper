@@ -70,15 +70,9 @@ export default class ScrapeService {
 
         try {
             console.log(1);
-            await page.goto(url);
+            await page.goto(url, {waitUntil: 'load', timeout: 0});
             console.log(2);
-            const isGoogleCaptcha = await page.evaluate(() => {
-                return document.querySelector('iframe[title="recaptcha challenge"]') !== null;
-            });
-            console.log('isGoogleCaptcha:', isGoogleCaptcha);
-            if (isGoogleCaptcha) {
-                await page.solveRecaptchas();
-            }
+            await page.solveRecaptchas();
             console.log(3);
             await page.waitForSelector('span[data-event-action="source-code-tab-clicked"]');
             console.log(4);
