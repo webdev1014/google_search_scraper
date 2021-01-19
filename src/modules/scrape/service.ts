@@ -21,7 +21,11 @@ export default class ScrapeService {
         args: [
             '--no-sandbox',
         ],
-        headless: false,
+        defaultViewport: {
+            'width': 1600,
+            'height': 900,
+        },
+        headless: true,
     };
     private token = '293843ef93997824c8d45dd102cf9452';
     private cluster: Cluster = null;
@@ -42,7 +46,7 @@ export default class ScrapeService {
             puppeteer: puppeteer,
             puppeteerOptions: this.option,
             timeout: 300000,
-            retryLimit: 5,
+            retryLimit: 3,
         });
         this.cluster.on('taskerror', (err, data) => {
             console.log(`Error crawling ${data}: ${err.message}`);
@@ -51,7 +55,7 @@ export default class ScrapeService {
         const contents = [];
         await this.cluster.task(async ({ page, data: url }) => {
             const content = await this.scrape(page, url);
-            contents.push({ content });
+            contents.push(content);
         });
 
 
@@ -65,26 +69,28 @@ export default class ScrapeService {
         return contents;
     }
 
-    async scrape(page: Page, url: string): Promise<string> {
+    async scrape(page: Page, url: string): Promise<any> {
         await page.setViewport({width: 1600, height: 900});
 
         try {
             await page.goto(url);
             await page.solveRecaptchas();
+            await page.waitForTimeout(300);
             await page.waitForSelector('span[data-event-action="source-code-tab-clicked"]');
+            await page.waitForTimeout(200);
             await page.click('span[data-event-action="source-code-tab-clicked"]');
             await page.waitForSelector('div[role="button"][data-tooltip="Copy"]');
-            await page.click('div[role="button"][data-tooltip="Copy"]');
+            await page.click('div[role="button"][data-tooltip="Copy"]', {clickCount: 3});
             
             const content = await read();
 
             await page.close();
-            return content; 
+            return { success: true, content };
         } catch (error) {
             console.log(error.message);
             await page.close();
-            return error.message;
-        }
+            return { success: false, content: error.message }
+        } 
     }
 
 }
